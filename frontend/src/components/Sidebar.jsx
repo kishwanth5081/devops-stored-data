@@ -231,6 +231,12 @@ export default function Sidebar({ activeTab, setActiveTab }) {
                       src={user.avatar}
                       alt={user?.name || 'Profile'}
                       className="w-full h-full object-cover rounded-xl"
+                      onError={(e) => {
+                        const cached = localStorage.getItem(`devops_avatar_${user?.id || user?.email}`);
+                        if (cached && e.target.src !== cached) {
+                          e.target.src = cached;
+                        }
+                      }}
                     />
                   ) : (
                     <span>{user?.name ? user.name.charAt(0).toUpperCase() : 'K'}</span>

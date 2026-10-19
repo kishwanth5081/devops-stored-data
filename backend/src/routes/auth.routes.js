@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const fs = require('fs');
 const db = require('../database/db');
 const config = require('../config/env');
 const { authenticateToken, requireAdmin } = require('../middleware/auth');
@@ -132,7 +133,13 @@ router.post('/avatar', authenticateToken, upload.single('avatar'), (req, res) =>
   try {
     let avatarUrl = null;
     if (req.file) {
-      avatarUrl = `/uploads/${req.file.filename}`;
+      try {
+        const fileBuffer = fs.readFileSync(req.file.path);
+        const mime = req.file.mimetype || 'image/png';
+        avatarUrl = `data:${mime};base64,${fileBuffer.toString('base64')}`;
+      } catch (readErr) {
+        avatarUrl = `/uploads/${req.file.filename}`;
+      }
     } else if (req.body && req.body.avatar) {
       avatarUrl = req.body.avatar;
     } else {

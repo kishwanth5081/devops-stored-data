@@ -272,7 +272,17 @@ export default function Navbar({ activeTab, setActiveTab, onNewPoc, onNewTask, o
             >
               <div className="w-7 h-7 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs border border-cyan-500/30 overflow-hidden flex-shrink-0">
                 {user?.avatar ? (
-                  <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                  <img 
+                    src={user.avatar} 
+                    alt="Avatar" 
+                    className="w-full h-full object-cover" 
+                    onError={(e) => {
+                      const cached = localStorage.getItem(`devops_avatar_${user?.id || user?.email}`);
+                      if (cached && e.target.src !== cached) {
+                        e.target.src = cached;
+                      }
+                    }}
+                  />
                 ) : (
                   <span>{user?.name ? user.name.charAt(0).toUpperCase() : 'U'}</span>
                 )}
@@ -291,7 +301,17 @@ export default function Navbar({ activeTab, setActiveTab, onNewPoc, onNewTask, o
                 <div className="flex items-center gap-2.5 mb-3 pb-3 border-b border-slate-800">
                   <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 text-white font-bold text-xs flex items-center justify-center flex-shrink-0 overflow-hidden shadow-sm ring-1 ring-cyan-400/30">
                     {user?.avatar ? (
-                      <img src={user.avatar} alt="Profile" className="w-full h-full object-cover" />
+                      <img 
+                        src={user.avatar} 
+                        alt="Profile" 
+                        className="w-full h-full object-cover" 
+                        onError={(e) => {
+                          const cached = localStorage.getItem(`devops_avatar_${user?.id || user?.email}`);
+                          if (cached && e.target.src !== cached) {
+                            e.target.src = cached;
+                          }
+                        }}
+                      />
                     ) : (
                       <span>{user?.name ? user.name.charAt(0).toUpperCase() : 'U'}</span>
                     )}

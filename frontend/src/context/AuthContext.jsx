@@ -21,6 +21,16 @@ export function AuthProvider({ children }) {
       setLoading(true);
       try {
         const currentUser = await api.getCurrentUser();
+        const userKey = currentUser.id || currentUser.email;
+        const cachedAvatar = localStorage.getItem(`devops_avatar_${userKey}`);
+
+        if (currentUser.avatar) {
+          localStorage.setItem(`devops_avatar_${userKey}`, currentUser.avatar);
+        } else if (cachedAvatar) {
+          currentUser.avatar = cachedAvatar;
+          api.uploadAvatar(cachedAvatar).catch(() => {});
+        }
+
         setUser(currentUser);
       } catch (err) {
         console.error('Failed to restore session:', err);
@@ -36,6 +46,16 @@ export function AuthProvider({ children }) {
     const data = await api.login(identifier, password);
     sessionStorage.setItem('devops_token', data.token);
     setToken(data.token);
+
+    const userKey = data.user.id || data.user.email;
+    const cachedAvatar = localStorage.getItem(`devops_avatar_${userKey}`);
+    if (data.user.avatar) {
+      localStorage.setItem(`devops_avatar_${userKey}`, data.user.avatar);
+    } else if (cachedAvatar) {
+      data.user.avatar = cachedAvatar;
+      api.uploadAvatar(cachedAvatar).catch(() => {});
+    }
+
     setUser(data.user);
     return data;
   };
@@ -59,6 +79,15 @@ export function AuthProvider({ children }) {
     if (newToken) {
       sessionStorage.setItem('devops_token', newToken);
       setToken(newToken);
+    }
+    if (updatedUser) {
+      const userKey = updatedUser.id || updatedUser.email;
+      if (updatedUser.avatar) {
+        localStorage.setItem(`devops_avatar_${userKey}`, updatedUser.avatar);
+      } else if (updatedUser.avatar === null) {
+        // User explicitly removed their avatar
+        localStorage.removeItem(`devops_avatar_${userKey}`);
+      }
     }
     setUser(updatedUser);
   };
