@@ -131,11 +131,22 @@ if (config.ENABLE_HTTPS && fs.existsSync(config.SSL_KEY_PATH) && fs.existsSync(c
       cert: fs.readFileSync(config.SSL_CERT_PATH),
     };
     httpsServer = https.createServer(sslOptions, app);
+    const os = require('os');
+    const netInterfaces = os.networkInterfaces();
+    let networkIp = '127.0.0.1';
+    for (const name of Object.keys(netInterfaces)) {
+      for (const net of netInterfaces[name]) {
+        if (net.family === 'IPv4' && !net.internal) {
+          networkIp = net.address;
+          break;
+        }
+      }
+    }
     httpsServer.listen(config.HTTPS_PORT, '0.0.0.0', () => {
       console.log(`🔒 SSL/TLS HTTPS Server running on port ${config.HTTPS_PORT}`);
       console.log(`🔐 Local HTTPS:   https://localhost:${config.HTTPS_PORT}`);
       console.log(`🔐 IPv4 HTTPS:    https://127.0.0.1:${config.HTTPS_PORT}`);
-      console.log(`🔐 Network HTTPS: https://192.168.0.104:${config.HTTPS_PORT}`);
+      console.log(`🔐 Network HTTPS: https://${networkIp}:${config.HTTPS_PORT}`);
       console.log(`📜 SSL Cert:      ${config.SSL_CERT_PATH}`);
       console.log(`🔑 SSL Key:       ${config.SSL_KEY_PATH}`);
       console.log(`====================================================`);
