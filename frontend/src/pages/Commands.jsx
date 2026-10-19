@@ -27,7 +27,6 @@ export default function Commands({ setActiveTab }) {
   const [categorySearch, setCategorySearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [copiedId, setCopiedId] = useState(null);
-  const [activeInspectorCommand, setActiveInspectorCommand] = useState(ALL_BUILTIN_COMMANDS[0]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingCustomId, setEditingCustomId] = useState(null);
 
@@ -197,8 +196,6 @@ export default function Commands({ setActiveTab }) {
         return c;
       });
       saveCustomCommandsToStorage(updated);
-      const updatedActive = updated.find((c) => c.id === editingCustomId);
-      if (updatedActive) setActiveInspectorCommand(updatedActive);
     } else {
       const newCmd = {
         id: `custom-${Date.now()}`,
@@ -214,7 +211,6 @@ export default function Commands({ setActiveTab }) {
         isCustom: true
       };
       saveCustomCommandsToStorage([newCmd, ...customCommands]);
-      setActiveInspectorCommand(newCmd);
     }
 
     setShowAddModal(false);
@@ -224,9 +220,6 @@ export default function Commands({ setActiveTab }) {
     if (window.confirm('Are you sure you want to delete this custom command?')) {
       const updated = customCommands.filter((c) => c.id !== id);
       saveCustomCommandsToStorage(updated);
-      if (activeInspectorCommand?.id === id) {
-        setActiveInspectorCommand(ALL_BUILTIN_COMMANDS[0]);
-      }
     }
   };
 
@@ -319,11 +312,11 @@ set -e
         </div>
       </div>
 
-      {/* Main 3-Column Layout: Categories Sidebar | Commands Stream | Terminal Inspector */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
+      {/* Main 2-Column Layout: Categories Sidebar | Commands Stream */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         
-        {/* COLUMN 1: Category Sidebar (Matching Screenshot Style) */}
-        <div className="xl:col-span-3 lg:col-span-4 bg-[#090d16] border border-slate-800/80 rounded-2xl p-3 flex flex-col shadow-xl">
+        {/* COLUMN 1: Category Sidebar */}
+        <div className="lg:col-span-4 xl:col-span-3 bg-[#090d16] border border-slate-800/80 rounded-2xl p-3 flex flex-col shadow-xl">
           
           <div className="px-2 py-1.5 mb-2 flex items-center justify-between">
             <span className="text-xs font-bold text-slate-300 uppercase tracking-wider font-mono flex items-center gap-2">
@@ -391,8 +384,8 @@ set -e
           </div>
         </div>
 
-        {/* COLUMN 2: Commands Cards Stream */}
-        <div className="xl:col-span-5 lg:col-span-8 flex flex-col space-y-3">
+        {/* COLUMN 2: Commands Cards Stream (Expanded) */}
+        <div className="lg:col-span-8 xl:col-span-9 flex flex-col space-y-3">
           
           {/* Search bar inside command view */}
           <div className="relative">
@@ -421,7 +414,6 @@ set -e
               <span>{currentCategoryObj?.label || 'Commands'}</span>
               <span className="text-slate-500 font-normal">({filteredCommands.length} matches)</span>
             </span>
-            <span className="text-[11px] text-slate-500 hidden sm:inline">↕ Side scrollable</span>
           </div>
 
           {/* Scrollable Command Cards Container */}
@@ -442,58 +434,52 @@ set -e
               </div>
             ) : (
               filteredCommands.map((cmd) => {
-                const isSelected = activeInspectorCommand?.id === cmd.id;
                 const isCopied = copiedId === cmd.id;
 
                 return (
                   <div
                     key={cmd.id}
-                    onClick={() => setActiveInspectorCommand(cmd)}
-                    className={`group relative rounded-xl border p-3.5 transition cursor-pointer ${
-                      isSelected
-                        ? 'bg-slate-900/95 border-cyan-500/60 shadow-lg shadow-cyan-950/30 ring-1 ring-cyan-500/30'
-                        : 'bg-slate-900/60 border-slate-800/80 hover:border-slate-700 hover:bg-slate-900/90'
-                    }`}
+                    className="group relative rounded-xl border p-4 transition bg-slate-900/60 border-slate-800/80 hover:border-slate-700 hover:bg-slate-900/90 shadow-md"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="space-y-1.5 flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="text-xs font-bold text-white tracking-tight group-hover:text-cyan-300 transition">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-sm font-bold text-white tracking-tight group-hover:text-cyan-300 transition">
                             {cmd.title}
                           </span>
 
                           {cmd.privilege === 'sudo' ? (
-                            <span className="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase tracking-wider bg-rose-950/80 text-rose-300 border border-rose-800/60 font-mono">
+                            <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-rose-950/80 text-rose-300 border border-rose-800/60 font-mono">
                               sudo
                             </span>
                           ) : (
-                            <span className="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700 font-mono">
+                            <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700 font-mono">
                               user
                             </span>
                           )}
 
-                          <span className="px-1.5 py-0.2 rounded text-[9px] font-mono text-cyan-400/80 bg-cyan-950/40 border border-cyan-900/40">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono text-cyan-400/80 bg-cyan-950/40 border border-cyan-900/40">
                             {cmd.categoryLabel}
                           </span>
 
                           {cmd.isCustom && (
-                            <span className="px-1.5 py-0.2 rounded text-[9px] font-bold text-amber-300 bg-amber-950/60 border border-amber-800/60 font-mono">
+                            <span className="px-2 py-0.5 rounded text-[9px] font-bold text-amber-300 bg-amber-950/60 border border-amber-800/60 font-mono">
                               CUSTOM
                             </span>
                           )}
                         </div>
 
-                        <p className="text-xs text-slate-400 line-clamp-1">{cmd.description}</p>
+                        <p className="text-xs text-slate-400 leading-relaxed">{cmd.description}</p>
                       </div>
 
                       {/* Action buttons on card */}
-                      <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center gap-2 flex-shrink-0">
                         {cmd.isCustom && (
                           <>
                             <button
                               type="button"
                               onClick={() => handleOpenAddModal(cmd)}
-                              className="p-1 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-slate-800 transition"
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-slate-800 transition"
                               title="Edit Custom Command"
                             >
                               <Edit3 className="w-3.5 h-3.5" />
@@ -501,7 +487,7 @@ set -e
                             <button
                               type="button"
                               onClick={() => handleDeleteCustomCommand(cmd.id)}
-                              className="p-1 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
                               title="Delete Custom Command"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -512,7 +498,7 @@ set -e
                         <button
                           type="button"
                           onClick={() => copyToClipboard(cmd.command, cmd.id)}
-                          className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-mono font-medium transition ${
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition ${
                             isCopied
                               ? 'bg-emerald-950 text-emerald-300 border border-emerald-800'
                               : 'bg-slate-800 hover:bg-cyan-950 hover:text-cyan-300 hover:border-cyan-800 text-slate-300 border border-slate-700'
@@ -521,13 +507,13 @@ set -e
                         >
                           {isCopied ? (
                             <>
-                              <Check className="w-3 h-3 text-emerald-400" />
-                              <span className="text-[11px]">Copied</span>
+                              <Check className="w-3.5 h-3.5 text-emerald-400" />
+                              <span>Copied</span>
                             </>
                           ) : (
                             <>
-                              <Copy className="w-3 h-3" />
-                              <span className="text-[11px]">Copy</span>
+                              <Copy className="w-3.5 h-3.5" />
+                              <span>Copy</span>
                             </>
                           )}
                         </button>
@@ -535,15 +521,23 @@ set -e
                     </div>
 
                     {/* Code snippet display */}
-                    <div className="mt-2.5 bg-slate-950 rounded-lg p-2.5 border border-slate-800/80 font-mono text-xs text-emerald-400 overflow-x-auto flex items-center justify-between">
+                    <div className="mt-3 bg-slate-950 rounded-xl p-3 border border-slate-800/80 font-mono text-xs text-emerald-400 overflow-x-auto flex items-center justify-between">
                       <span className="select-all break-all whitespace-pre-wrap">{cmd.command}</span>
                     </div>
 
+                    {/* Technical breakdown / explanation if present */}
+                    {cmd.explanation && (
+                      <div className="mt-2 text-[11px] text-slate-300 bg-slate-950/40 px-3 py-2 rounded-lg border border-slate-800/50 font-sans leading-relaxed">
+                        <span className="text-cyan-400 font-mono font-bold mr-1.5">Note:</span>
+                        {cmd.explanation}
+                      </div>
+                    )}
+
                     {/* Tags */}
                     {cmd.tags && cmd.tags.length > 0 && (
-                      <div className="mt-2 flex items-center gap-1.5 flex-wrap">
+                      <div className="mt-2.5 flex items-center gap-1.5 flex-wrap">
                         {cmd.tags.map((t, i) => (
-                          <span key={i} className="text-[10px] text-slate-500 font-mono">
+                          <span key={i} className="text-[10px] text-slate-500 font-mono bg-slate-950/60 px-2 py-0.5 rounded border border-slate-800/60">
                             #{t}
                           </span>
                         ))}
@@ -552,116 +546,6 @@ set -e
                   </div>
                 );
               })
-            )}
-          </div>
-        </div>
-
-        {/* COLUMN 3: Interactive Cyber Terminal Inspector */}
-        <div className="xl:col-span-4 lg:col-span-12 sticky top-20">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[calc(100vh-260px)] min-h-[500px]">
-            
-            {/* Terminal Window Header */}
-            <div className="bg-slate-950 px-4 py-3 border-b border-slate-800 flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 rounded-full bg-rose-500/80"></div>
-                <div className="w-3 h-3 rounded-full bg-amber-500/80"></div>
-                <div className="w-3 h-3 rounded-full bg-emerald-500/80"></div>
-                <span className="ml-2 text-xs font-mono text-slate-400">devops@terminal:~#</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-mono uppercase text-cyan-400 bg-cyan-950 px-2 py-0.5 rounded border border-cyan-800">
-                  Command Inspector
-                </span>
-              </div>
-            </div>
-
-            {/* Terminal Content */}
-            {activeInspectorCommand ? (
-              <div className="overflow-y-auto flex-1 p-4 sm:p-5 space-y-4 pr-3 scrollbar-thin">
-                
-                {/* Command Title & Metadata */}
-                <div>
-                  <h3 className="text-base font-bold text-white flex items-center gap-2">
-                    <Terminal className="w-4 h-4 text-cyan-400" />
-                    <span>{activeInspectorCommand.title}</span>
-                  </h3>
-                  <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                    {activeInspectorCommand.description}
-                  </p>
-                </div>
-
-                {/* Shell Command Block with Copy */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
-                    <span>EXECUTE COMMAND:</span>
-                    <button
-                      onClick={() => copyToClipboard(activeInspectorCommand.command, 'inspector')}
-                      className="text-cyan-400 hover:text-cyan-300 flex items-center gap-1 transition"
-                    >
-                      {copiedId === 'inspector' ? (
-                        <>
-                          <Check className="w-3 h-3 text-emerald-400" />
-                          <span className="text-emerald-400">Copied!</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3 h-3" />
-                          <span>Copy Syntax</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                  <div className="bg-slate-950 p-3.5 rounded-xl border border-cyan-500/30 font-mono text-xs text-cyan-300 relative group overflow-x-auto shadow-inner whitespace-pre-wrap break-all">
-                    <span className="text-slate-500 mr-2">$</span>
-                    <span className="select-all font-semibold">{activeInspectorCommand.command}</span>
-                  </div>
-                </div>
-
-                {/* Technical Explanation */}
-                {activeInspectorCommand.explanation && (
-                  <div className="space-y-1 bg-slate-950/60 p-3 rounded-xl border border-slate-800 text-xs">
-                    <span className="text-[10px] uppercase font-mono font-bold text-slate-400 block mb-1">
-                      Technical Breakdown & Behavior:
-                    </span>
-                    <p className="text-slate-300 leading-relaxed font-sans">
-                      {activeInspectorCommand.explanation}
-                    </p>
-                  </div>
-                )}
-
-                {/* Expected Console Output Simulator */}
-                {activeInspectorCommand.expectedOutput && (
-                  <div className="space-y-1">
-                    <span className="text-[10px] uppercase font-mono font-bold text-slate-400 block">
-                      Sample Expected Console Output:
-                    </span>
-                    <div className="bg-black/90 p-3.5 rounded-xl border border-slate-800 font-mono text-[11px] text-slate-300 max-h-48 overflow-y-auto whitespace-pre-wrap leading-relaxed shadow-inner">
-                      {activeInspectorCommand.expectedOutput}
-                    </div>
-                  </div>
-                )}
-
-                {/* Prerequisites & Scope */}
-                {activeInspectorCommand.prerequisites && (
-                  <div className="flex items-start gap-2 p-3 rounded-xl bg-slate-950 border border-slate-800/80 text-xs">
-                    <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <span className="font-semibold text-slate-200">Prerequisites & Scope: </span>
-                      <span className="text-slate-400">{activeInspectorCommand.prerequisites}</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Quick Execution Tip */}
-                <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
-                  <span>Privilege: {activeInspectorCommand.privilege?.toUpperCase() || 'USER'}</span>
-                  <span>Category: {activeInspectorCommand.categoryLabel}</span>
-                </div>
-              </div>
-            ) : (
-              <div className="p-8 text-center text-slate-500 text-xs font-mono">
-                Select any command card on the left to inspect its detailed parameters and sample output.
-              </div>
             )}
           </div>
         </div>
