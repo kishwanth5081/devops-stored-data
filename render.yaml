@@ -3,18 +3,10 @@ services:
     name: devops-stored-data
     env: docker
     dockerfilePath: ./Dockerfile
-    plan: starter
+    plan: free
     region: oregon
     envVars:
       - key: NODE_ENV
         value: production
       - key: JWT_SECRET
         generateValue: true
-      - key: DB_PATH
-        value: /var/data/devops_stored.sqlite
-      - key: UPLOADS_DIR
-        value: /var/data/uploads
-    disk:
-      name: devops-data
-      mountPath: /var/data
-      sizeGB: 1
