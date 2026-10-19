@@ -6,9 +6,12 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(() => {
-    // Clear persistent token so opening the application starts at the login page
-    localStorage.removeItem('devops_token');
-    return sessionStorage.getItem('devops_token');
+    // Reset session tokens on page refresh/load so user always lands directly on the login page
+    try {
+      sessionStorage.removeItem('devops_token');
+      localStorage.removeItem('devops_token');
+    } catch {}
+    return null;
   });
   const [loading, setLoading] = useState(false);
 
@@ -69,8 +72,10 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
-    sessionStorage.removeItem('devops_token');
-    localStorage.removeItem('devops_token');
+    try {
+      sessionStorage.removeItem('devops_token');
+      localStorage.removeItem('devops_token');
+    } catch {}
     setToken(null);
     setUser(null);
   };

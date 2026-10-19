@@ -82,6 +82,12 @@ function MainApp() {
     };
   }, [isAuthenticated]);
 
+  useEffect(() => {
+    if (!isAuthenticated && window.location.hash) {
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+  }, [isAuthenticated]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">
