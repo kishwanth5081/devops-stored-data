@@ -22,6 +22,10 @@ yarn-error.log*
 pnpm-debug.log*
 scratch/
 
+# Binary executables
+*.exe
+backend/cloudflared.exe
+
 # OS metadata
 .DS_Store
 Thumbs.db
