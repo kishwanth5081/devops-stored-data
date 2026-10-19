@@ -1,6 +1,6 @@
 # Multi-Stage Dockerfile for DevOps Stored Data
 # Stage 1: Build Frontend
-FROM node:20-slim AS frontend-builder
+FROM node:22-slim AS frontend-builder
 WORKDIR /app/frontend
 
 COPY frontend/package*.json ./
@@ -9,8 +9,8 @@ RUN npm ci
 COPY frontend/ ./
 RUN npm run build
 
-# Stage 2: Production Server (Debian Bookworm glibc for 100% native SQLite stability)
-FROM node:20-slim AS runner
+# Stage 2: Production Server (Node 22 LTS glibc for better-sqlite3 v13 compatibility)
+FROM node:22-slim AS runner
 WORKDIR /app
 
 # Install runtime utilities (wget for healthcheck) and build tools for native addons
