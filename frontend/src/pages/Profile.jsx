@@ -20,7 +20,10 @@ import {
   EyeOff,
   Camera,
   Loader2,
-  Trash2
+  Trash2,
+  Download,
+  Pencil,
+  X
 } from 'lucide-react';
 
 export default function Profile() {
@@ -29,6 +32,17 @@ export default function Profile() {
   // Avatar Upload State
   const avatarInputRef = useRef(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [showImageViewer, setShowImageViewer] = useState(false);
+
+  const handleDownloadAvatar = () => {
+    if (!user?.avatar) return;
+    const a = document.createElement('a');
+    a.href = user.avatar;
+    a.download = `${user?.name || 'profile'}-photo.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
 
   const handleAvatarFileChange = async (e) => {
     const file = e.target.files?.[0];
@@ -67,6 +81,7 @@ export default function Profile() {
     try {
       const res = await api.deleteAvatar();
       updateUser(res.user);
+      setShowImageViewer(false);
     } catch (err) {
       alert('Failed to remove profile picture: ' + err.message);
     }
@@ -185,29 +200,75 @@ export default function Profile() {
               onChange={handleAvatarFileChange}
             />
 
-            <div 
-              onClick={() => avatarInputRef.current?.click()}
-              className="relative group/avatar cursor-pointer flex-shrink-0"
-              title="Click to choose profile picture from file explorer"
-            >
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 text-white font-black text-2xl flex items-center justify-center shadow-xl shadow-cyan-500/25 ring-2 ring-cyan-400/40 overflow-hidden group-hover/avatar:ring-cyan-300 transition">
-                {uploadingAvatar ? (
-                  <Loader2 className="w-8 h-8 text-white animate-spin" />
-                ) : user?.avatar ? (
-                  <img
-                    src={user.avatar}
-                    alt={user?.name || 'Profile'}
-                    className="w-full h-full object-cover rounded-2xl"
-                  />
-                ) : (
-                  <span>{user?.name ? user.name.charAt(0).toUpperCase() : 'U'}</span>
-                )}
+            <div className="flex flex-col items-center">
+              <div 
+                onClick={() => user?.avatar ? setShowImageViewer(true) : avatarInputRef.current?.click()}
+                className="relative group/avatar cursor-pointer flex-shrink-0"
+                title={user?.avatar ? "Click to view full image" : "Click to upload profile picture"}
+              >
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 text-white font-black text-2xl flex items-center justify-center shadow-xl shadow-cyan-500/25 ring-2 ring-cyan-400/40 overflow-hidden group-hover/avatar:ring-cyan-300 transition">
+                  {uploadingAvatar ? (
+                    <Loader2 className="w-8 h-8 text-white animate-spin" />
+                  ) : user?.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt={user?.name || 'Profile'}
+                      className="w-full h-full object-cover rounded-2xl"
+                    />
+                  ) : (
+                    <span>{user?.name ? user.name.charAt(0).toUpperCase() : 'U'}</span>
+                  )}
+                </div>
+
+                {/* Hover overlay */}
+                <div className="absolute inset-0 bg-black/60 rounded-2xl flex flex-col items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity text-white text-[11px] font-medium gap-1">
+                  {user?.avatar ? (
+                    <>
+                      <Eye className="w-5 h-5 text-cyan-300" />
+                      <span>View</span>
+                    </>
+                  ) : (
+                    <>
+                      <Camera className="w-5 h-5" />
+                      <span>Upload</span>
+                    </>
+                  )}
+                </div>
               </div>
 
-              {/* Hover overlay with camera icon */}
-              <div className="absolute inset-0 bg-black/60 rounded-2xl flex flex-col items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity text-white text-[11px] font-medium gap-1">
-                <Camera className="w-6 h-6" />
-                <span>Upload</span>
+              {/* Quick Actions: View, Edit, Remove */}
+              <div className="flex items-center gap-1.5 mt-2">
+                {user?.avatar && (
+                  <button
+                    type="button"
+                    onClick={() => setShowImageViewer(true)}
+                    className="px-2 py-0.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 text-[10px] font-mono border border-cyan-500/20 flex items-center gap-1 transition cursor-pointer"
+                    title="View high resolution image"
+                  >
+                    <Eye className="w-2.5 h-2.5" />
+                    <span>View</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => avatarInputRef.current?.click()}
+                  className="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[10px] font-mono border border-slate-700 flex items-center gap-1 transition cursor-pointer"
+                  title="Upload / Change profile picture"
+                >
+                  <Pencil className="w-2.5 h-2.5 text-emerald-400" />
+                  <span>{user?.avatar ? 'Edit' : 'Upload'}</span>
+                </button>
+                {user?.avatar && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveAvatar}
+                    className="px-2 py-0.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 text-[10px] font-mono border border-rose-500/20 flex items-center gap-1 transition cursor-pointer"
+                    title="Remove profile picture"
+                  >
+                    <Trash2 className="w-2.5 h-2.5" />
+                    <span>Remove</span>
+                  </button>
+                )}
               </div>
             </div>
             <div>
@@ -475,6 +536,84 @@ export default function Profile() {
           </div>
         </div>
       </div>
+
+      {/* High-Resolution Profile Image Viewer Modal */}
+      {showImageViewer && user?.avatar && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setShowImageViewer(false)}
+        >
+          <div 
+            className="relative max-w-md w-full bg-slate-900 border border-slate-700/80 rounded-3xl shadow-2xl overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800 bg-slate-950/70">
+              <div className="flex items-center gap-2.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse" />
+                <div>
+                  <h3 className="text-sm font-bold text-white tracking-wide">{user?.name || 'Profile'} Photo</h3>
+                  <p className="text-[11px] text-slate-400 font-mono">{user?.email}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowImageViewer(false)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+                title="Close (ESC)"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* High-Res Image Display */}
+            <div className="p-6 flex items-center justify-center bg-slate-950/80 min-h-[280px]">
+              <div className="relative group max-h-[55vh] rounded-2xl overflow-hidden ring-2 ring-cyan-500/30 shadow-2xl">
+                <img 
+                  src={user.avatar} 
+                  alt={user?.name || 'Profile'} 
+                  className="w-full h-auto max-h-[50vh] object-contain rounded-2xl"
+                />
+              </div>
+            </div>
+
+            {/* Modal Action Footer */}
+            <div className="px-5 py-3.5 border-t border-slate-800 bg-slate-950/70 flex items-center justify-between gap-2 flex-wrap">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowImageViewer(false);
+                    avatarInputRef.current?.click();
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-semibold border border-slate-700 transition cursor-pointer"
+                >
+                  <Pencil className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Edit / Change</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleRemoveAvatar}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 text-xs font-semibold border border-rose-500/30 transition cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Remove</span>
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleDownloadAvatar}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 hover:text-cyan-300 text-xs font-semibold border border-cyan-500/30 transition cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
