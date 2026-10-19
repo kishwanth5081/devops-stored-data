@@ -36,9 +36,6 @@ export default function Dashboard({ setActiveTab, onNewPoc, onNewTask, onUploadF
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(new Date());
   const [autoRefresh, setAutoRefresh] = useState(false);
-  const [copiedTunnel, setCopiedTunnel] = useState(false);
-  const [optimizing, setOptimizing] = useState(false);
-  const [optimizeMessage, setOptimizeMessage] = useState(null);
 
   const fetchStats = useCallback(async (isManual = false) => {
     if (isManual) setRefreshing(true);
@@ -67,28 +64,6 @@ export default function Dashboard({ setActiveTab, onNewPoc, onNewTask, onUploadF
     }, 30000); // 30 seconds
     return () => clearInterval(interval);
   }, [autoRefresh, fetchStats]);
-
-  const handleOptimizeDb = async () => {
-    setOptimizing(true);
-    setOptimizeMessage(null);
-    try {
-      const res = await api.optimizeDatabase();
-      setOptimizeMessage(res.message || 'SQLite Database optimized (VACUUM completed)');
-      fetchStats();
-      setTimeout(() => setOptimizeMessage(null), 4000);
-    } catch (err) {
-      setOptimizeMessage('Optimization failed: ' + err.message);
-      setTimeout(() => setOptimizeMessage(null), 4000);
-    } finally {
-      setOptimizing(false);
-    }
-  };
-
-  const copyTunnel = (url) => {
-    navigator.clipboard.writeText(url);
-    setCopiedTunnel(true);
-    setTimeout(() => setCopiedTunnel(false), 2000);
-  };
 
   const formatBytes = (bytes) => {
     if (!bytes || bytes === 0) return '0 KB';
@@ -136,16 +111,6 @@ export default function Dashboard({ setActiveTab, onNewPoc, onNewTask, onUploadF
       </div>
     );
   }
-
-  const systemHealth = stats?.systemHealth || {
-    uptimeSeconds: 3600,
-    database: 'Connected & Healthy',
-    tunnelUrl: 'https://devops-stored-data.loca.lt',
-    localIp: '192.168.0.104',
-    port: 5000,
-    httpsPort: 5443,
-    rssMemoryBytes: 85000000
-  };
 
   return (
     <div className="space-y-6 animate-fadeIn pb-8">
@@ -328,132 +293,6 @@ export default function Dashboard({ setActiveTab, onNewPoc, onNewTask, onUploadF
             <span>Disaster Recovery &amp; Architecture</span>
             <ArrowRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition text-purple-400" />
           </div>
-        </div>
-
-      </div>
-
-      {/* FEATURE 1: Live Infrastructure & System Health Telemetry Card */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
-        
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-              <Server className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-base font-bold text-white flex items-center gap-2">
-                <span>Infrastructure &amp; Server Health Telemetry</span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono font-bold flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                  OPERATIONAL
-                </span>
-              </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Real-time node telemetry, database integrity, and multi-computer access tunnel
-              </p>
-            </div>
-          </div>
-
-          {/* Quick Database Maintenance Buttons */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleOptimizeDb}
-              disabled={optimizing}
-              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-400 text-xs font-semibold border border-slate-700 transition flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-              title="Run SQLite VACUUM optimization"
-            >
-              <Wrench className={`w-3.5 h-3.5 ${optimizing ? 'animate-spin' : ''}`} />
-              <span>{optimizing ? 'Optimizing...' : 'Optimize DB'}</span>
-            </button>
-
-            <a
-              href={api.getDatabaseBackupUrl()}
-              download
-              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition flex items-center gap-1.5"
-              title="Download SQLite Database Backup"
-            >
-              <Download className="w-3.5 h-3.5 text-slate-400" />
-              <span>Backup DB</span>
-            </a>
-          </div>
-        </div>
-
-        {optimizeMessage && (
-          <div className="p-3 rounded-xl bg-cyan-950/40 border border-cyan-800 text-cyan-300 text-xs flex items-center gap-2 animate-fadeIn">
-            <CheckCircle2 className="w-4 h-4 text-cyan-400 flex-shrink-0" />
-            <span>{optimizeMessage}</span>
-          </div>
-        )}
-
-        {/* 4 Telemetry Metric Widgets */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-          
-          {/* Node Server Status */}
-          <div className="bg-slate-950/80 p-3.5 rounded-xl border border-slate-800/90 space-y-1">
-            <div className="flex items-center justify-between text-xs text-slate-400">
-              <span className="font-mono">API Server</span>
-              <Activity className="w-3.5 h-3.5 text-emerald-400" />
-            </div>
-            <div className="text-sm font-bold text-white flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-              <span>Express Port {systemHealth.port}</span>
-            </div>
-            <div className="text-[11px] font-mono text-emerald-400">
-              HTTP {systemHealth.port} | HTTPS {systemHealth.httpsPort || 5443} (TLS)
-            </div>
-          </div>
-
-          {/* SQLite DB Health */}
-          <div className="bg-slate-950/80 p-3.5 rounded-xl border border-slate-800/90 space-y-1">
-            <div className="flex items-center justify-between text-xs text-slate-400">
-              <span className="font-mono">SQLite Database</span>
-              <Database className="w-3.5 h-3.5 text-cyan-400" />
-            </div>
-            <div className="text-sm font-bold text-emerald-400 truncate">
-              {systemHealth.database}
-            </div>
-            <div className="text-[11px] font-mono text-slate-500">
-              Storage: {formatBytes(stats.summary?.totalStorageBytes)}
-            </div>
-          </div>
-
-          {/* Uptime & Runtime */}
-          <div className="bg-slate-950/80 p-3.5 rounded-xl border border-slate-800/90 space-y-1">
-            <div className="flex items-center justify-between text-xs text-slate-400">
-              <span className="font-mono">Process Uptime</span>
-              <Clock className="w-3.5 h-3.5 text-blue-400" />
-            </div>
-            <div className="text-sm font-bold text-white font-mono">
-              {formatUptime(systemHealth.uptimeSeconds)}
-            </div>
-            <div className="text-[11px] font-mono text-slate-500">
-              Heap: {formatBytes(systemHealth.rssMemoryBytes || 85000000)}
-            </div>
-          </div>
-
-          {/* Multi-Computer Remote Sharing Tunnel */}
-          <div className="bg-slate-950/80 p-3.5 rounded-xl border border-slate-800/90 space-y-1">
-            <div className="flex items-center justify-between text-xs text-slate-400">
-              <span className="font-mono">Public Secure URL</span>
-              <Globe className="w-3.5 h-3.5 text-emerald-400" />
-            </div>
-            <div className="flex items-center justify-between gap-1">
-              <span className="text-xs font-mono font-bold text-emerald-300 truncate max-w-[150px]">
-                {systemHealth.tunnelUrl || 'https://devops-stored-data.loca.lt'}
-              </span>
-              <button
-                onClick={() => copyTunnel(systemHealth.tunnelUrl || 'https://devops-stored-data.loca.lt')}
-                className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition text-[10px] flex items-center gap-1 cursor-pointer"
-                title="Copy secure HTTPS URL"
-              >
-                {copiedTunnel ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-slate-400" />}
-              </button>
-            </div>
-            <div className="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
-              <span>🔒 DevOps Stored Data HTTPS</span>
-            </div>
-          </div>
-
         </div>
 
       </div>
