@@ -1,0 +1,38 @@
+{
+  "name": "devops-stored-data",
+  "version": "1.0.0",
+  "description": "DevOps Stored Data - Centralized Vault for Proofs of Concept, Configurations, Scripts, and Tasks",
+  "main": "backend/src/server.js",
+  "scripts": {
+    "start": "node backend/src/server.js",
+    "dev": "node backend/src/server.js",
+    "build": "npm --prefix frontend install && npm --prefix frontend run build",
+    "seed": "node -e \"require('./backend/src/database/seed')()\"",
+    "backup": "powershell -ExecutionPolicy Bypass -File ./scripts/backup.ps1",
+    "set-credentials": "node ./scripts/setUserCredentials.js"
+  },
+  "keywords": [
+    "devops",
+    "poc",
+    "kanban",
+    "scripts",
+    "configuration",
+    "vault",
+    "monitoring"
+  ],
+  "author": "DevOps Engineering Team",
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^13.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.8",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.1",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "morgan": "^1.12.1",
+    "multer": "^2.4.0"
+  }
+}

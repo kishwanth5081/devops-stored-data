@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+
+# Production frontend build is created by build step or docker
+frontend/dist/
+
+# Local Environment Variables & Secrets
+.env
+.env.local
+.env.*.local
+backend/.env
+
+# Local SSL Certificates
+backend/certs/*.key
+
+# Scratch & Temporary Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+scratch/
+
+# OS metadata
+.DS_Store
+Thumbs.db
