@@ -297,154 +297,6 @@ export default function Dashboard({ setActiveTab, onNewPoc, onNewTask, onUploadF
 
       </div>
 
-      {/* FEATURE 2 & 3: Two-Column Section (Urgent Priority Tasks + Live DevOps Activity Feed) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        
-        {/* Left Column: Urgent High-Priority Tasks */}
-        <div className="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400">
-                  <AlertTriangle className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-white">Priority Action Items</h3>
-                  <p className="text-[11px] text-slate-400">Upcoming critical and high-priority DevOps tasks</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setActiveTab('tasks')}
-                className="text-xs font-medium text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
-              >
-                <span>All Tasks</span>
-                <ArrowRight className="w-3 h-3" />
-              </button>
-            </div>
-
-            <div className="space-y-2.5">
-              {stats.urgentTasks && stats.urgentTasks.length > 0 ? (
-                stats.urgentTasks.map((task) => (
-                  <div
-                    key={task.id}
-                    onClick={() => setActiveTab('tasks')}
-                    className="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 hover:border-slate-700 cursor-pointer transition flex items-center justify-between group"
-                  >
-                    <div className="min-w-0 flex-1 pr-3">
-                      <div className="flex items-center gap-2">
-                        <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded font-mono uppercase ${
-                          task.priority === 'Critical'
-                            ? 'bg-rose-950 text-rose-400 border border-rose-800'
-                            : task.priority === 'High'
-                            ? 'bg-amber-950 text-amber-400 border border-amber-800'
-                            : 'bg-blue-950 text-blue-400 border border-blue-800'
-                        }`}>
-                          {task.priority}
-                        </span>
-                        <span className="text-xs font-semibold text-slate-200 group-hover:text-cyan-300 transition truncate">
-                          {task.title}
-                        </span>
-                      </div>
-                      <div className="text-[11px] text-slate-400 flex items-center gap-2 mt-1 font-mono">
-                        <span>Assignee: {task.assigned_name || 'Unassigned'}</span>
-                        {task.due_date && <span>• Due: {task.due_date}</span>}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-mono">
-                        {task.status}
-                      </span>
-                      <ArrowUpRight className="w-4 h-4 text-slate-500 group-hover:text-cyan-400 transition" />
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="py-8 text-center text-xs text-slate-500 bg-slate-950/40 rounded-xl border border-slate-800">
-                  <CheckCircle2 className="w-6 h-6 text-emerald-400 mx-auto mb-1 opacity-70" />
-                  All critical &amp; high priority tasks are completed.
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
-            <span>Filter tasks by milestone or assignee in Tasks tab</span>
-            <button
-              onClick={onNewTask || (() => setActiveTab('tasks'))}
-              className="text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Create Task</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Right Column: Live DevOps Activity Feed */}
-        <div className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400">
-                  <ShieldCheck className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-white">Live DevOps Event Stream</h3>
-                  <p className="text-[11px] text-slate-400">Recent audit log operations &amp; updates</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setActiveTab('audit')}
-                className="text-xs font-medium text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-mono"
-              >
-                <span>Audit Logs</span>
-                <ArrowRight className="w-3 h-3" />
-              </button>
-            </div>
-
-            <div className="space-y-2.5 max-h-[300px] overflow-y-auto pr-1 scrollbar-thin">
-              {stats.recentActivity && stats.recentActivity.length > 0 ? (
-                stats.recentActivity.map((act) => (
-                  <div
-                    key={act.id}
-                    className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800/70 text-xs space-y-1 hover:border-slate-700 transition"
-                  >
-                    <div className="flex items-center justify-between gap-1">
-                      <span className="font-bold text-slate-200 truncate">
-                        {act.action || 'System Action'}
-                      </span>
-                      <span className="text-[10px] text-slate-500 font-mono whitespace-nowrap">
-                        {act.created_at ? new Date(act.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recent'}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-400 truncate">
-                      {act.details || `Performed on ${act.entity_type}`}
-                    </p>
-                    <div className="text-[10px] text-cyan-400/80 font-mono">
-                      By: {act.user_email || 'admin@devops.internal'}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="py-8 text-center text-xs text-slate-500">
-                  No recent activity logged.
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="mt-4 pt-3 border-t border-slate-800/80 text-center">
-            <button
-              onClick={() => setActiveTab('audit')}
-              className="text-xs text-cyan-400 hover:text-cyan-300 font-mono transition"
-            >
-              Inspect Full Cryptographic Audit Logs →
-            </button>
-          </div>
-        </div>
-
-      </div>
-
       {/* FEATURE 4: Task Status Kanban Breakdown */}
       <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl">
         <div className="flex items-center justify-between mb-4">
@@ -457,7 +309,7 @@ export default function Dashboard({ setActiveTab, onNewPoc, onNewTask, onUploadF
           </div>
           <button
             onClick={() => setActiveTab('tasks')}
-            className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
+            className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-1 cursor-pointer"
           >
             <span>View All Tasks</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -522,7 +374,7 @@ export default function Dashboard({ setActiveTab, onNewPoc, onNewTask, onUploadF
             </div>
             <button
               onClick={() => setActiveTab('pocs')}
-              className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
+              className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-1 cursor-pointer"
             >
               <span>Explore All POCs</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -565,6 +417,154 @@ export default function Dashboard({ setActiveTab, onNewPoc, onNewTask, onUploadF
           </div>
         </div>
       )}
+
+      {/* FEATURE 2 & 3: Two-Column Section (Urgent Priority Tasks + Live DevOps Activity Feed) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        
+        {/* Left Column: Urgent High-Priority Tasks */}
+        <div className="lg:col-span-7 bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400">
+                  <AlertTriangle className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white">Priority Action Items</h3>
+                  <p className="text-[11px] text-slate-400">Upcoming critical and high-priority DevOps tasks</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveTab('tasks')}
+                className="text-xs font-medium text-cyan-400 hover:text-cyan-300 flex items-center gap-1 cursor-pointer"
+              >
+                <span>All Tasks</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <div className="space-y-2.5">
+              {stats.urgentTasks && stats.urgentTasks.length > 0 ? (
+                stats.urgentTasks.map((task) => (
+                  <div
+                    key={task.id}
+                    onClick={() => setActiveTab('tasks')}
+                    className="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 hover:border-slate-700 cursor-pointer transition flex items-center justify-between group"
+                  >
+                    <div className="min-w-0 flex-1 pr-3">
+                      <div className="flex items-center gap-2">
+                        <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded font-mono uppercase ${
+                          task.priority === 'Critical'
+                            ? 'bg-rose-950 text-rose-400 border border-rose-800'
+                            : task.priority === 'High'
+                            ? 'bg-amber-950 text-amber-400 border border-amber-800'
+                            : 'bg-blue-950 text-blue-400 border border-blue-800'
+                        }`}>
+                          {task.priority}
+                        </span>
+                        <span className="text-xs font-semibold text-slate-200 group-hover:text-cyan-300 transition truncate">
+                          {task.title}
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-slate-400 flex items-center gap-2 mt-1 font-mono">
+                        <span>Assignee: {task.assigned_name || 'Unassigned'}</span>
+                        {task.due_date && <span>• Due: {task.due_date}</span>}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-mono">
+                        {task.status}
+                      </span>
+                      <ArrowUpRight className="w-4 h-4 text-slate-500 group-hover:text-cyan-400 transition" />
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="py-8 text-center text-xs text-slate-500 bg-slate-950/40 rounded-xl border border-slate-800">
+                  <CheckCircle2 className="w-6 h-6 text-emerald-400 mx-auto mb-1 opacity-70" />
+                  All critical &amp; high priority tasks are completed.
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+            <span>Filter tasks by milestone or assignee in Tasks tab</span>
+            <button
+              onClick={onNewTask || (() => setActiveTab('tasks'))}
+              className="text-cyan-400 hover:text-cyan-300 font-semibold flex items-center gap-1 cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Create Task</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Right Column: Live DevOps Activity Feed */}
+        <div className="lg:col-span-5 bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white">Live DevOps Event Stream</h3>
+                  <p className="text-[11px] text-slate-400">Recent audit log operations &amp; updates</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveTab('audit')}
+                className="text-xs font-medium text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-mono cursor-pointer"
+              >
+                <span>Audit Logs</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <div className="space-y-2.5 max-h-[300px] overflow-y-auto pr-1 scrollbar-thin">
+              {stats.recentActivity && stats.recentActivity.length > 0 ? (
+                stats.recentActivity.map((act) => (
+                  <div
+                    key={act.id}
+                    className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800/70 text-xs space-y-1 hover:border-slate-700 transition"
+                  >
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="font-bold text-slate-200 truncate">
+                        {act.action || 'System Action'}
+                      </span>
+                      <span className="text-[10px] text-slate-500 font-mono whitespace-nowrap">
+                        {act.created_at ? new Date(act.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recent'}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-400 truncate">
+                      {act.details || `Performed on ${act.entity_type}`}
+                    </p>
+                    <div className="text-[10px] text-cyan-400/80 font-mono">
+                      By: {act.user_email || 'admin@devops.internal'}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="py-8 text-center text-xs text-slate-500">
+                  No recent activity logged.
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-slate-800/80 text-center">
+            <button
+              onClick={() => setActiveTab('audit')}
+              className="text-xs text-cyan-400 hover:text-cyan-300 font-mono transition cursor-pointer"
+            >
+              Inspect Full Cryptographic Audit Logs →
+            </button>
+          </div>
+        </div>
+
+      </div>
 
     </div>
   );
