@@ -22,6 +22,12 @@ yarn-error.log*
 pnpm-debug.log*
 scratch/
 
+# SQLite WAL and shared memory files (OS/architecture dependent)
+*.sqlite-shm
+*.sqlite-wal
+*.db-shm
+*.db-wal
+
 # Binary executables
 *.exe
 backend/cloudflared.exe
